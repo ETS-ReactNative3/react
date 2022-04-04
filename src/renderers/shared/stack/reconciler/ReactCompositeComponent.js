@@ -702,7 +702,7 @@ var ReactCompositeComponent = {
     } else {
       if (__DEV__) {
         const componentName = this.getName();
-        
+
         if (!warningAboutMissingGetChildContext[componentName]) {
           warningAboutMissingGetChildContext[componentName] = true;
           warning(
@@ -768,6 +768,7 @@ var ReactCompositeComponent = {
    */
   performUpdateIfNecessary: function(transaction) {
     if (this._pendingElement != null) {
+      // 如果接收了props, 就会调用此组件的receiveComponent, 再在里面调用updateComponent更新组件
       ReactReconciler.receiveComponent(
         this,
         this._pendingElement,
@@ -775,6 +776,7 @@ var ReactCompositeComponent = {
         this._context
       );
     } else if (this._pendingStateQueue !== null || this._pendingForceUpdate) {
+      // 如果没有接受props, 但是有新的要更新的状态(_pendingStateQueue不为空)就会直接调用updateComponent来更新
       this.updateComponent(
         transaction,
         this._currentElement,
@@ -785,6 +787,7 @@ var ReactCompositeComponent = {
     } else {
       var callbacks = this._pendingCallbacks;
       this._pendingCallbacks = null;
+      // 存储 callback以便后续按顺序调用
       if (callbacks) {
         for (var j = 0; j < callbacks.length; j++) {
           transaction.getReactMountReady().enqueue(

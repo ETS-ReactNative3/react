@@ -145,7 +145,9 @@ var TransactionImpl = {
       // close -- if it's still set to true in the finally block, it means
       // one of these calls threw.
       errorThrown = true;
+      // 先运行所有wrapper中的initialize方法
       this.initializeAll(0);
+      // 再执行perform方法传入的callback
       ret = method.call(scope, a, b, c, d, e, f);
       errorThrown = false;
     } finally {
@@ -154,12 +156,14 @@ var TransactionImpl = {
           // If `method` throws, prefer to show that stack trace over any thrown
           // by invoking `closeAll`.
           try {
+            // 最后运行wrapper中的close方法
             this.closeAll(0);
           } catch (err) {
           }
         } else {
           // Since `method` didn't throw, we don't want to silence the exception
           // here.
+          // 最后运行wrapper中的close方法
           this.closeAll(0);
         }
       } finally {

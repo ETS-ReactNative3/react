@@ -24,6 +24,9 @@ function enqueueUpdate(internalInstance) {
 }
 
 function getInternalInstanceReadyForUpdate(publicInstance, callerName) {
+  // 从map取出ReactComponent组件,
+  // 还记得mountComponent时把ReactElement作为key，将ReactComponent存入了map中了吧，
+  // ReactComponent是React组件的核心，包含各种状态，数据和操作方法。而ReactElement则仅仅是一个数据类。
   var internalInstance = ReactInstanceMap.get(publicInstance);
   if (!internalInstance) {
     if (__DEV__) {
@@ -206,7 +209,7 @@ var ReactUpdateQueue = {
         'instead, use forceUpdate().'
       );
     }
-
+    // 根据 this.setState 中的 this 拿到内部实例, 也就是组件实例
     var internalInstance = getInternalInstanceReadyForUpdate(
       publicInstance,
       'setState'
@@ -219,6 +222,7 @@ var ReactUpdateQueue = {
     var queue =
       internalInstance._pendingStateQueue ||
       (internalInstance._pendingStateQueue = []);
+    // 将partial state存到_pendingStateQueue
     queue.push(partialState);
 
     if (callback) {
@@ -229,7 +233,7 @@ var ReactUpdateQueue = {
         internalInstance._pendingCallbacks = [callback];
       }
     }
-
+    // 调用enqueueUpdate，将要更新的ReactComponent放入数组中
     enqueueUpdate(internalInstance);
   },
 

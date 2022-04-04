@@ -86,6 +86,7 @@ function internalGetID(node) {
 
 /**
  * Mounts this component and inserts it into the DOM.
+ * 装载此组件并将其插入DOM
  *
  * @param {ReactComponent} componentInstance The instance to mount.
  * @param {DOMElement} container DOM element to mount into.
@@ -393,7 +394,7 @@ var ReactMount = {
     // according to the current batching strategy.
 
     ReactUpdates.batchedUpdates(
-      batchedMountComponentIntoNode,
+      batchedMountComponentIntoNode, // 负责初始渲染
       componentInstance,
       container,
       shouldReuseMarkup,

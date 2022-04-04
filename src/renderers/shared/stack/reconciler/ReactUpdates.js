@@ -120,6 +120,7 @@ function runBatchedUpdates(transaction) {
   // Since reconciling a component higher in the owner hierarchy usually (not
   // always -- see shouldComponentUpdate()) will reconcile children, reconcile
   // them before their children by sorting the array.
+  // 排序保证父组件优先于子组件更新
   dirtyComponents.sort(mountOrderComparator);
 
   // Any updates enqueued while reconciling must be performed after this entire
@@ -127,8 +128,9 @@ function runBatchedUpdates(transaction) {
   // C, B could update twice in a single batch if C's render enqueues an update
   // to B (since B would have already updated, we should skip it, and the only
   // way we can know to do so is by checking the batch counter).
+  // 代表批量更新的次数, 保证每个组件只更新一次
   updateBatchNumber++;
-
+  // 遍历 dirtyComponents
   for (var i = 0; i < len; i++) {
     // If a component is unmounted before pending changes apply, it will still
     // be here, but we assume that it has cleared its _pendingCallbacks and
@@ -145,7 +147,7 @@ function runBatchedUpdates(transaction) {
       markerName = 'React update: ' + namedComponent.getName();
       console.time(markerName);
     }
-
+    // 执行更新
     ReactReconciler.performUpdateIfNecessary(
       component,
       transaction.reconcileTransaction,
@@ -163,6 +165,7 @@ var flushBatchedUpdates = function() {
   // array and perform any updates enqueued by mount-ready handlers (i.e.,
   // componentDidUpdate) but we need to check here too in order to catch
   // updates enqueued by setState callbacks.
+  // 启动批量更新事务（循环遍历处理完所有dirtyComponents）
   while (dirtyComponents.length) {
     var transaction = ReactUpdatesFlushTransaction.getPooled();
     transaction.perform(runBatchedUpdates, null, transaction);
@@ -175,6 +178,7 @@ var flushBatchedUpdates = function() {
  * list of functions which will be executed once the rerender occurs.
  */
 function enqueueUpdate(component) {
+  // 注入默认策略
   ensureInjected();
 
   // Various parts of our code (such as ReactCompositeComponent's
@@ -182,12 +186,12 @@ function enqueueUpdate(component) {
   // verify that that's the case. (This is called by each top-level update
   // function, like setState, forceUpdate, etc.; creation and
   // destruction of top-level components is guarded in ReactMount.)
-
+  // 如果没有开启batch或当前batch已结束，就开启一次batch来执行, 这通常发生在异步回调中调用 setState 的情况
   if (!batchingStrategy.isBatchingUpdates) {
     batchingStrategy.batchedUpdates(enqueueUpdate, component);
     return;
   }
-
+  // 如果正在创建或更新组件,则暂且先不处理update,只是将组件放在dirtyComponents数组中
   dirtyComponents.push(component);
   if (component._updateBatchNumber == null) {
     component._updateBatchNumber = updateBatchNumber + 1;
