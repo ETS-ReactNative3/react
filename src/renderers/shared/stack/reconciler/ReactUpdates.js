@@ -147,7 +147,7 @@ function runBatchedUpdates(transaction) {
       markerName = 'React update: ' + namedComponent.getName();
       console.time(markerName);
     }
-    // 执行更新
+    // 执行更新，对每一个组件都做处理，实际上依据对应的属性数据执行对应的方法实现组件更新，即执行updateComponent方法
     ReactReconciler.performUpdateIfNecessary(
       component,
       transaction.reconcileTransaction,
@@ -193,6 +193,7 @@ function enqueueUpdate(component) {
   }
   // 如果正在创建或更新组件,则暂且先不处理update,只是将组件放在dirtyComponents数组中
   dirtyComponents.push(component);
+  // 只会设置一次组件的_updateBatchNumber
   if (component._updateBatchNumber == null) {
     component._updateBatchNumber = updateBatchNumber + 1;
   }
